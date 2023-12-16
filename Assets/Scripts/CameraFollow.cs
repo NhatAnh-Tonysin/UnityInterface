@@ -1,19 +1,30 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
-    public Camera playerCamera;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField]
+    private Transform target;//đối tượng follow
 
-    // Update is called once per frame
-    void Update()
+    [SerializeField]
+    private float speed=0.2f;
+
+    [SerializeField]
+    private Vector3 offset; //khoảng cách từ camera tới mục tiêu
+
+    private void Start()
+    {
+        offset = transform.position - target.position;
+    }
+    void LateUpdate()
     {
         
+        // tạo vị trí mới mà camera sẽ di chuyển tới
+        Vector3 newPos = target.position + offset;
+        Vector3 smoothCam = Vector3.Lerp(transform.position, newPos, speed * Time.deltaTime);
+
+        //cập nhật vị trí cho camera
+        transform.position = smoothCam;
     }
 }

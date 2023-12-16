@@ -4,12 +4,17 @@ using UnityEngine;
 
 public enum TargetEnum
 {
-    TopLeft, TopRight, BotLeft, BotRight
+    TopLeft, TopRight, BotLeft, BotRight,
+}
+
+public enum DriveMode
+{
+    Auto, Manual,
 }
 public class PlayerController : MonoBehaviour
 {
-    public Camera CameraFollow;
     public float Speed;
+    public float RotateSpeed = 100f;
     public Transform topLeftTrans;
     public Transform topRightTrans;
     public Transform botLeftTrans;
@@ -17,6 +22,11 @@ public class PlayerController : MonoBehaviour
 
     private TargetEnum nextTarget = TargetEnum.TopLeft;
     private Transform currentTarget;
+
+
+
+    [SerializeField]
+    private DriveMode mode = DriveMode.Auto;
 
     // Start is called before the first frame update
     void Start()
@@ -27,24 +37,14 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Vector3 curPos = transform.position;
-        Vector3 targetPos = currentTarget.position;
-        Vector3 dir = targetPos - curPos;
-
-
-        float distance = dir.magnitude;
-       if(distance>0.1f)
+        if (mode == DriveMode.Auto)
         {
-            transform.position = Vector3.MoveTowards(curPos, targetPos, Speed * Time.deltaTime);
+            AutoMode();
         }
-        else
+        else if (mode == DriveMode.Manual)
         {
-            SetNextTarget(nextTarget);
+            ManualMode();
         }
-
-        // thay đổi hướng quay của đối tượng
-        Quaternion targetRotate = Quaternion.LookRotation(dir, Vector3.up);
-        transform.rotation = targetRotate;
     }
 
     void SetNextTarget(TargetEnum target)
@@ -73,4 +73,44 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void AutoMode()
+    {
+        Vector3 curPos = transform.position;
+        Vector3 targetPos = currentTarget.position;
+        Vector3 dir = targetPos - curPos;
+
+
+        float distance = dir.magnitude;
+        if (distance > 0.1f)
+        {
+            transform.position = Vector3.MoveTowards(curPos, targetPos, Speed * Time.deltaTime);
+        }
+        else
+        {
+            SetNextTarget(nextTarget);
+        }
+
+        // thay đổi hướng quay của đối tượng
+        Quaternion targetRotate = Quaternion.LookRotation(dir, Vector3.up);
+        transform.rotation = targetRotate;
+    }
+    void ManualMode()
+    {
+        // Input GetAxis
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
+        float verticalInput = Input.GetAxisRaw("Vertical");
+
+        //Tính vector di chuyển dựa theo input
+        //Vector3 move = new Vector3(horizontalInput, 0f, verticalInput) * Speed * Time.deltaTime;
+        Vector3 move = new Vector3(0f, 0f, verticalInput) * Speed * Time.deltaTime;
+        Vector3 rota = new Vector3(0f, horizontalInput, 0f) * RotateSpeed * Time.deltaTime;
+
+        //Áp vị trí
+        transform.Translate(move);
+        transform.Rotate(rota);
+
+
+
+        Debug.Log(horizontalInput + "," + verticalInput);
+    }
 }
